@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ATS
+﻿namespace ATS
 {
     public struct PhoneNumber
     {
@@ -17,7 +15,7 @@ namespace ATS
         {
             if (obj is PhoneNumber)
             {
-                return _number == ((PhoneNumber) obj)._number;
+                return Number == ((PhoneNumber) obj).Number;
             }
 
             return false;
@@ -25,12 +23,22 @@ namespace ATS
 
         public bool Equals(PhoneNumber other)
         {
-            return string.Equals(_number, other._number);
+            return string.Equals(Number, other.Number);
         }
 
         public override int GetHashCode()
         {
-            return _number?.GetHashCode() ?? 0;
+            return Number?.GetHashCode() ?? 0;
+        }
+
+        public static bool operator == (PhoneNumber x, PhoneNumber y)
+        {
+            return x.Equals(y);
+        }
+
+        public static bool operator !=(PhoneNumber x, PhoneNumber y)
+        {
+            return !(x == y);
         }
     }
 }
