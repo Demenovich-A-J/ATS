@@ -1,1 +1,6 @@
 D:\SourceTreeProjects\ATS\ATS\bin\Debug\ATS.exe.config
+D:\SourceTreeProjects\ATS\ATS\bin\Debug\ATS.exe
+D:\SourceTreeProjects\ATS\ATS\bin\Debug\ATS.pdb
+D:\SourceTreeProjects\ATS\ATS\obj\Debug\ATS.csprojResolveAssemblyReference.cache
+D:\SourceTreeProjects\ATS\ATS\obj\Debug\ATS.exe
+D:\SourceTreeProjects\ATS\ATS\obj\Debug\ATS.pdb
