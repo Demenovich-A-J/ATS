@@ -1,13 +1,18 @@
 ﻿using System;
 using ATS.Station_Model.AbstractClasses;
+using ATS.Station_Model.Intarfaces;
+using ATS.Station_Model.States;
 
 namespace ATS.TestAts
 {
     public class TestPort : Port
     {
-        public void Test()
+        public override void RegisterEventHandlersForTerminal(ITerminal terminal)
         {
-            StateChanged +=  (sender, state) => { Console.WriteLine($"Port detect change his State to {State}");};
+            terminal.Plugging += (port, args) => { State = PortState.Free; };
+            terminal.UnPlugging += (port, args) => { State = PortState.Unpluged; };
+            StateChanged += (sender, state) => { Console.WriteLine($"Port detect change his State to {State}"); };
+
         }
     }
 }
