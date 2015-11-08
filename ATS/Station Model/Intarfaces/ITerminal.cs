@@ -7,16 +7,20 @@ namespace ATS.Station_Model.Intarfaces
     {
         PhoneNumber Number { get; }
         event EventHandler<CallInfo> OutgoingCall;
-        event EventHandler<ResponseState> Responce;
-        event EventHandler Pluging;
-        event EventHandler UnPluging;
+        event EventHandler<Responce> Responce;
+        event EventHandler<PhoneNumber> IncomingRequest;
+        event EventHandler Plugging;
+        event EventHandler UnPlugging;
         event EventHandler Online;
-        event EventHandler Ofline;
+        event EventHandler Offline;
 
+        void GetReqest(PhoneNumber source);
         void Drop();
         void Answer();
         void Plug();
         void Unplug();
         void Call(PhoneNumber target);
+
+        void RegisterEventHandlersForPort(IPort port);
     }
 }

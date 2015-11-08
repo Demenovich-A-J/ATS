@@ -10,43 +10,84 @@ namespace ATS.Station_Model.AbstractClasses
         {
             Number = number;
         }
+
         protected bool IsOnline { get; private set; }
         public PhoneNumber Number { get; }
 
         public event EventHandler<CallInfo> OutgoingCall;
-        public event EventHandler<ResponseState> Responce;
+        public event EventHandler<Responce> Responce;
+        public event EventHandler<PhoneNumber> IncomingRequest;
 
-        protected virtual void OnResponce(object sender,ResponseState args)
+        public void GetReqest(PhoneNumber source)
         {
-            Responce?.Invoke(this, args);
+            OnIncomingRequest(source);
+        }
+
+
+        protected virtual void OnIncomingRequest(PhoneNumber source)
+        {
+            IncomingRequest?.Invoke(this, source);
         }
 
         public void Drop()
         {
-            OnResponce(this,ResponseState.Drop);
+            OnResponce(this, new Responce(ResponseState.Drop, Number));
         }
 
         public void Answer()
         {
-            OnResponce(this, ResponseState.Accept);
+            OnResponce(this, new Responce(ResponseState.Accept, Number));
         }
 
         public void Call(PhoneNumber target)
         {
             if (IsOnline)
             {
-                OnOutgoingCall(this,new CallInfo(target, Number, DateTime.Now));
+                OnOutgoingCall(this, new CallInfo(target, Number));
             }
         }
 
+        public event EventHandler Online;
+        public event EventHandler Offline;
 
-        protected virtual void OnOutgoingCall(object sender,CallInfo target)
+        public event EventHandler Plugging;
+        public event EventHandler UnPlugging;
+
+        public void Plug()
+        {
+            if(IsOnline) return;
+            OnPlugging(this, null);
+            IsOnline = true;
+        }
+
+        public void Unplug()
+        {
+            if(IsOnline == false) return;
+            OnUnPlugging(this, null);
+            IsOnline = false;
+        }
+
+        public virtual void RegisterEventHandlersForPort(IPort port)
+        {
+            port.StateChanged += (sender, state) =>
+            {
+                if(state == PortState.Unpluged)
+                    OnOffline(sender, null);
+                if(state == PortState.Free)
+                    OnOnline(sender,null);
+            };
+        }
+
+        protected virtual void OnResponce(object sender, Responce responce)
+        {
+            Responce?.Invoke(this, responce);
+        }
+
+
+        protected virtual void OnOutgoingCall(object sender, CallInfo target)
         {
             OutgoingCall?.Invoke(this, target);
         }
-
-        public event EventHandler Online;
-        public event EventHandler Ofline;
 
         protected virtual void OnOnline(object sender, EventArgs args)
         {
@@ -54,35 +95,20 @@ namespace ATS.Station_Model.AbstractClasses
             IsOnline = true;
         }
 
-        protected virtual void OnOfline(object sender, EventArgs args)
+        protected virtual void OnOffline(object sender, EventArgs args)
         {
-            Ofline?.Invoke(this, args);
+            Offline?.Invoke(this, args);
             IsOnline = false;
         }
 
-        public event EventHandler Pluging;
-        public event EventHandler UnPluging;
-
-        protected virtual void OnPluging(object sender, EventArgs args)
+        protected virtual void OnPlugging(object sender, EventArgs args)
         {
-            Pluging?.Invoke(this, args);
+            Plugging?.Invoke(this, args);
         }
 
-        protected virtual void OnUnPluging(object sender, EventArgs args)
+        protected virtual void OnUnPlugging(object sender, EventArgs args)
         {
-            UnPluging?.Invoke(this, args);
-        }
-
-        public void Plug()
-        {
-            OnPluging(this, null);
-        }
-
-        public void Unplug()
-        {
-            if(!IsOnline) return;
-
-            OnUnPluging(this,null);
+            UnPlugging?.Invoke(this, args);
         }
     }
 }
