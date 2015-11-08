@@ -23,6 +23,7 @@ namespace ATS.Station_Model.AbstractClasses
 
         public event EventHandler<PortState> StateChanging;
         public event EventHandler<PortState> StateChanged;
+        public abstract void RegisterEventHandlersForTerminal(ITerminal terminal);
 
         protected virtual void OnStateChanging(object sender, PortState newstate)
         {

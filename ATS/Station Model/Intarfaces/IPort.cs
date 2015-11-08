@@ -8,5 +8,6 @@ namespace ATS.Station_Model.Intarfaces
         PortState State { get; set; }
         event EventHandler<PortState> StateChanging;
         event EventHandler<PortState> StateChanged;
+        void RegisterEventHandlersForTerminal(ITerminal terminal);
     }
 }
