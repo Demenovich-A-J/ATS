@@ -41,7 +41,7 @@ namespace ATS.Station_Model.AbstractClasses
 
 
             var targetTerminal = TerminalCollection.FirstOrDefault(x => x.Number == info.Target);
-            targetTerminal.GetReqest(info.Source);
+            targetTerminal?.GetReqest(info.Source);
             _outCallsCollection.Add(info);
             WaitActionTerminals.Add(targetTerminal);
         }
