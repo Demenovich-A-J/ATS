@@ -55,6 +55,7 @@ namespace ATS.Station_Model.AbstractClasses
                     break;
                 case ResponseState.Drop:
                     InterruptCall(callInfo);
+                    OnCallInfoPrepared(this, callInfo);
                     break;
                 default:
                     Console.WriteLine($"Invalid Responce from {responce.Source} state = {responce.State} ");
@@ -150,9 +151,15 @@ namespace ATS.Station_Model.AbstractClasses
             _portsMapping.Remove(terminal.Number);
         }
 
-        public event EventHandler<CallInfo> CallInfoPrepared;
         public abstract void RegisterEventHandlersForTerminal(ITerminal terminal);
 
         public abstract void RegisterEventHandlersForPort(IPort port);
+
+        public event EventHandler<CallInfo> CallInfoPrepared;
+
+        protected virtual void OnCallInfoPrepared(object sender,CallInfo callInfo)
+        {
+            CallInfoPrepared?.Invoke(this, callInfo);
+        }
     }
 }

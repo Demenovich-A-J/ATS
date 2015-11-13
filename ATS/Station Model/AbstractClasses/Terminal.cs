@@ -43,7 +43,7 @@ namespace ATS.Station_Model.AbstractClasses
         {
             if (IsOnline)
             {
-                OnOutgoingCall(this, new CallInfo(target, Number));
+                OnOutgoingCall(this, new CallInfo(target, Number,CallInfoState.OutGoingCall));
             }
         }
 
