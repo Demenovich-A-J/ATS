@@ -19,17 +19,17 @@ namespace ATS
             foreach (var v in ats.TerminalCollection)
             {
                 v.Plug();
-                v.Unplug();
             }
 
-            /*ats.TerminalCollection.ElementAt(0).Call(new PhoneNumber("111-11-1"));
+            ats.TerminalCollection.ElementAt(0).Call(new PhoneNumber("111-11-1"));
 
-            ats.WaitActionTerminals.ElementAt(0).Answer();*/
+            ats.TerminalCollection.ElementAt(1).Answer();
 
-            ats.PortCollection.ElementAt(0).State = PortState.Unpluged;
-            ats.PortCollection.ElementAt(0).State = PortState.Free;
+            ats.TerminalCollection.ElementAt(1).Drop();
 
 
+            //ats.PortCollection.ElementAt(0).State = PortState.Unpluged;
+            //ats.PortCollection.ElementAt(0).State = PortState.Free;
         }
     }
 }

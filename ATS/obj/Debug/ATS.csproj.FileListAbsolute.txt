@@ -4,3 +4,9 @@ D:\SourceTreeProjects\ATS\ATS\bin\Debug\ATS.pdb
 D:\SourceTreeProjects\ATS\ATS\obj\Debug\ATS.csprojResolveAssemblyReference.cache
 D:\SourceTreeProjects\ATS\ATS\obj\Debug\ATS.exe
 D:\SourceTreeProjects\ATS\ATS\obj\Debug\ATS.pdb
+E:\GitProjects\ATS\ATS\bin\Debug\ATS.exe.config
+E:\GitProjects\ATS\ATS\bin\Debug\ATS.exe
+E:\GitProjects\ATS\ATS\bin\Debug\ATS.pdb
+E:\GitProjects\ATS\ATS\obj\Debug\ATS.csprojResolveAssemblyReference.cache
+E:\GitProjects\ATS\ATS\obj\Debug\ATS.exe
+E:\GitProjects\ATS\ATS\obj\Debug\ATS.pdb

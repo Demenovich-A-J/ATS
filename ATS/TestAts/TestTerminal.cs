@@ -9,11 +9,11 @@ namespace ATS.TestAts
         public TestTerminal(PhoneNumber number) : base(number)
         {
             IncomingRequest += OnIncomingRequest;
-            Online += (sender, args) => { Console.WriteLine($"Phone {((Terminal)sender).Number} now Online"); };
-            Offline += (sender, args) => { Console.WriteLine($"Phone {((Terminal)sender).Number} now offline"); };
+            Online += (sender, args) => { Console.WriteLine($"Phone {((Terminal)sender).Number.Number} now Online"); };
+            Offline += (sender, args) => { Console.WriteLine($"Phone {((Terminal)sender).Number.Number} now offline"); };
         }
 
-        public void OnIncomingRequest(object sender, PhoneNumber source)
+        private void OnIncomingRequest(object sender, PhoneNumber source)
         {
             Console.WriteLine("{0} received request for incoming connection from {1}", Number.Number, source.Number);
         }

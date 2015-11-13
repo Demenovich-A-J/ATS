@@ -11,21 +11,21 @@ namespace ATS.Station_Model.AbstractClasses
     {
         private readonly ICollection<IPort> _portCollection;
         private readonly ICollection<ITerminal> _terminalCollection;
-        private readonly ICollection<CallInfo> _outCallsCollection;
-        private readonly ICollection<ITerminal> _waitActionTerminals; 
+        private readonly ICollection<CallInfo> _callInfoCollection;
+        private readonly ICollection<ITerminal> _waitActionTerminals;
+        private readonly IDictionary<ITerminal, ITerminal> _activeCallMapping;
         private readonly IDictionary<PhoneNumber, IPort> _portsMapping;
         protected Station(ICollection<IPort> ports, ICollection<ITerminal> terminals)
         {
             _portCollection = ports;
             _terminalCollection = terminals;
             _portsMapping = new Dictionary<PhoneNumber, IPort>();
-            _outCallsCollection = new List<CallInfo>();
+            _callInfoCollection = new List<CallInfo>();
             _waitActionTerminals = new List<ITerminal>();
+            _activeCallMapping = new Dictionary<ITerminal, ITerminal>();
         }
 
         public ICollection<ITerminal> TerminalCollection => _terminalCollection;
-
-        public ICollection<ITerminal> WaitActionTerminals => _waitActionTerminals;
 
         public ICollection<IPort> PortCollection => _portCollection;
 
@@ -34,17 +34,15 @@ namespace ATS.Station_Model.AbstractClasses
             var targetPort = GetPortByPhoneNumber(info.Target);
             if (targetPort.State == PortState.Unpluged || targetPort.State == PortState.Call) return;
 
-            var sourcePort = GetPortByPhoneNumber(info.Source);
-
-            sourcePort.State = PortState.Call;
-            targetPort.State = PortState.Call;
-
+            SetPortsStateTo(info.Source,info.Target,PortState.Call);
 
             var targetTerminal = TerminalCollection.FirstOrDefault(x => x.Number == info.Target);
+
             targetTerminal?.GetReqest(info.Source);
-            _outCallsCollection.Add(info);
-            WaitActionTerminals.Add(targetTerminal);
+            _callInfoCollection.Add(info);
+            _waitActionTerminals.Add(targetTerminal);
         }
+
 
         protected virtual void ResponseConnectionHandler(object sender, Responce responce)
         {
@@ -54,7 +52,6 @@ namespace ATS.Station_Model.AbstractClasses
             {
                 case ResponseState.Accept:
                     MakeCallActive(callInfo);
-                    InterruptActiveCall(callInfo);
                     break;
                 case ResponseState.Drop:
                     InterruptCall(callInfo);
@@ -67,36 +64,50 @@ namespace ATS.Station_Model.AbstractClasses
 
         private void MakeCallActive(CallInfo info)
         {
-            WaitActionTerminals.Remove(GetTerminalByPhoneNumber(info.Source));
+            var sourceTerminal = GetTerminalByPhoneNumber(info.Source);
+            var targetTerminal = GetTerminalByPhoneNumber(info.Target);
+
+            _waitActionTerminals.Remove(sourceTerminal);
+
+            _activeCallMapping.Add(sourceTerminal, targetTerminal);
+
             info.TimeBegin = DateTime.Now;
-            Thread.Sleep(new Random().Next(500, 1000));
-            info.Duration = info.TimeBegin - DateTime.Now;
+
         }
 
         private void InterruptCall(CallInfo info)
         {
-            _outCallsCollection.Remove(info);
-            WaitActionTerminals.Remove(GetTerminalByPhoneNumber(info.Source));
-            ResetPortsAfterCall(info.Source, info.Target);
-        }
-        private void InterruptActiveCall(CallInfo info)
-        {
-            _outCallsCollection.Remove(info);
-            ResetPortsAfterCall(info.Source,info.Target);
+            var sourceTerminal = GetTerminalByPhoneNumber(info.Source);
+            var targetTerminal = GetTerminalByPhoneNumber(info.Target);
+
+            Thread.Sleep(new Random().Next(5000, 10000));
+            info.Duration = info.TimeBegin - DateTime.Now;
+
+            if (_waitActionTerminals.Contains(sourceTerminal))
+            {
+                _waitActionTerminals.Remove(targetTerminal);
+            }
+            if (_activeCallMapping.ContainsKey(sourceTerminal))
+            {
+                _activeCallMapping.Remove(new KeyValuePair<ITerminal, ITerminal>(sourceTerminal, targetTerminal));
+            }
+
+            _callInfoCollection.Remove(info);
+            SetPortsStateTo(info.Source, info.Target,PortState.Free);
         }
 
-        private void ResetPortsAfterCall(PhoneNumber source, PhoneNumber target)
+        private void SetPortsStateTo(PhoneNumber source, PhoneNumber target, PortState state)
         {
             var targetPort = GetPortByPhoneNumber(target);
             var sourcePort = GetPortByPhoneNumber(source);
 
             if (targetPort != null)
             {
-                targetPort.State = PortState.Free;
+                targetPort.State = state;
             }
             if (sourcePort != null)
             {
-                sourcePort.State = PortState.Free;
+                sourcePort.State = state;
             }
         }
 
@@ -107,7 +118,7 @@ namespace ATS.Station_Model.AbstractClasses
 
         protected virtual CallInfo GetCallInfo(PhoneNumber target)
         {
-            return _outCallsCollection.FirstOrDefault(x => x.Target == target);
+            return _callInfoCollection.FirstOrDefault(x => x.Target == target);
         }
 
         protected virtual IPort GetPortByPhoneNumber(PhoneNumber number)
@@ -118,15 +129,13 @@ namespace ATS.Station_Model.AbstractClasses
         public void Add(ITerminal terminal)
         {
             var freePort = PortCollection.Except(_portsMapping.Values).FirstOrDefault();
-            if (freePort != null)
-            {
-                TerminalCollection.Add(terminal);
+            if (freePort == null) return;
+            TerminalCollection.Add(terminal);
 
-                MapTerminalToPort(terminal, freePort);
+            MapTerminalToPort(terminal, freePort);
 
-                RegisterEventHandlersForTerminal(terminal);
-                RegisterEventHandlersForPort(freePort);
-            }
+            RegisterEventHandlersForTerminal(terminal);
+            RegisterEventHandlersForPort(freePort);
         }
 
         private void MapTerminalToPort(ITerminal terminal, IPort port)
@@ -136,7 +145,7 @@ namespace ATS.Station_Model.AbstractClasses
             terminal.RegisterEventHandlersForPort(port);
         }
 
-        protected void UnMapTerminalFromPort(ITerminal terminal, IPort port)
+        private void UnMapTerminalFromPort(ITerminal terminal, IPort port)
         {
             _portsMapping.Remove(terminal.Number);
         }
