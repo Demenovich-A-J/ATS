@@ -1,6 +1,6 @@
-﻿using ATS.BilingSystemModel.Intarfaces;
+﻿using ATS.BillingSystemModel.Intarfaces;
 
-namespace ATS.BilingSystemModel.TarifPlans
+namespace ATS.BillingSystemModel.TarifPlans
 {
     public class EasyTalk : ITariffPlan
     {

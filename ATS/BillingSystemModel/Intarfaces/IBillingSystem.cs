@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using ATS.BilingSystemModel.Intarfaces;
 using ATS.Station_Model.Intarfaces;
 using ATS.User_Model;
 
-namespace ATS.BilingSystemModel.Intarfaces
+namespace ATS.BillingSystemModel.Intarfaces
 {
-    public interface IBilingSystem
+    public interface IBillingSystem
     {
         ICollection<ITariffPlan> TariffPlans { get; }
         IDictionary<ITerminal,IUser> TerminalsUserMapp { get; }

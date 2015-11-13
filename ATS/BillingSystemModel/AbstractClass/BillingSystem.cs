@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using ATS.BilingSystemModel.Intarfaces;
+using ATS.BillingSystemModel.Intarfaces;
 using ATS.Station_Model.Intarfaces;
 using ATS.User_Model;
 
-namespace ATS.BilingSystemModel.AbstractClass
+namespace ATS.BillingSystemModel.AbstractClass
 {
-    public abstract class BilingSystem : IBilingSystem
+    public abstract class BillingSystem : IBillingSystem
     {
         protected readonly IDictionary<IUser, ICollection<CallInfo>> _userCallinfoDictionary;
         protected readonly IDictionary<IUser, ITariffPlan> _userTariffPlansMapp; 
 
-        protected BilingSystem(ICollection<ITariffPlan> tariffPlans, IDictionary<ITerminal, IUser> terminalsUserMapp)
+        protected BillingSystem(ICollection<ITariffPlan> tariffPlans, IDictionary<ITerminal, IUser> terminalsUserMapp)
         {
             TariffPlans = tariffPlans;
             TerminalsUserMapp = terminalsUserMapp;

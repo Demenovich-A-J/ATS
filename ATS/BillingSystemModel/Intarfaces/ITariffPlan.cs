@@ -1,4 +1,4 @@
-﻿namespace ATS.BilingSystemModel.Intarfaces
+﻿namespace ATS.BillingSystemModel.Intarfaces
 {
     public interface ITariffPlan
     {

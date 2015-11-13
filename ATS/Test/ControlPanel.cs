@@ -1,4 +1,4 @@
-﻿using ATS.BilingSystemModel.AbstractClass;
+﻿using ATS.BillingSystemModel.AbstractClass;
 using ATS.Station_Model.AbstractClasses;
 using ATS.TestAts;
 
@@ -8,9 +8,9 @@ namespace ATS.Test
     {
 
         private readonly Station _ats;
-        private readonly BilingSystem _bilingSystem;
+        private readonly BillingSystem _bilingSystem;
 
-        public ControlPanel(Station ats, BilingSystem bilingSystem)
+        public ControlPanel(Station ats, BillingSystem bilingSystem)
         {
             _ats = ats;
             _bilingSystem = bilingSystem;
