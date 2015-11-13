@@ -43,11 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BilingSystemModel\AbstractClass\BilingSystem.cs" />
-    <Compile Include="BilingSystemModel\Intarfaces\IBilingSystem.cs" />
-    <Compile Include="BilingSystemModel\Intarfaces\ITariffPlan.cs" />
-    <Compile Include="BilingSystemModel\TarifPlans\EasyTalk.cs" />
+    <Compile Include="BillingSystemModel\AbstractClass\BillingSystem.cs" />
+    <Compile Include="BillingSystemModel\Intarfaces\IBillingSystem.cs" />
+    <Compile Include="BillingSystemModel\Intarfaces\ITariffPlan.cs" />
+    <Compile Include="BillingSystemModel\TarifPlans\EasyTalk.cs" />
     <Compile Include="CallInfo.cs" />
+    <Compile Include="CallInfoState.cs" />
     <Compile Include="PhoneNumber.cs" />
     <Compile Include="Responce.cs" />
     <Compile Include="Station Model\Intarfaces\IPort.cs" />
