@@ -43,6 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BilingSystemModel\AbstractClass\BilingSystem.cs" />
+    <Compile Include="BilingSystemModel\Intarfaces\IBilingSystem.cs" />
+    <Compile Include="BilingSystemModel\Intarfaces\ITariffPlan.cs" />
+    <Compile Include="BilingSystemModel\TarifPlans\EasyTalk.cs" />
     <Compile Include="CallInfo.cs" />
     <Compile Include="PhoneNumber.cs" />
     <Compile Include="Responce.cs" />
@@ -59,6 +63,8 @@
     <Compile Include="Station Model\States\ResponseState.cs" />
     <Compile Include="TestAts\TestPort.cs" />
     <Compile Include="TestAts\TestTerminal.cs" />
+    <Compile Include="Test\ControlPanel.cs" />
+    <Compile Include="Test\Velcome.cs" />
     <Compile Include="User Model\IUser.cs" />
     <Compile Include="User Model\User.cs" />
   </ItemGroup>
