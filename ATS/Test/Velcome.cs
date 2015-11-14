@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using ATS.BillingSystemModel.AbstractClass;
 using ATS.BillingSystemModel.Intarfaces;
 using ATS.Station_Model.Intarfaces;
@@ -14,5 +15,11 @@ namespace ATS.Test
         {
             
         }
+
+        public IEnumerable<CallInfo> GetStatistic(Func<CallInfo,bool> predicat ,IUser user)
+        {
+            return UserCallinfoDictionary.FirstOrDefault(x => x.Key == user).Value.Where(predicat); ;
+        }
+
     }
 }

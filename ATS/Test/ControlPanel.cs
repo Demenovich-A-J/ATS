@@ -2,7 +2,6 @@
 using ATS.BillingSystemModel.Intarfaces;
 using ATS.Station_Model.AbstractClasses;
 using ATS.Station_Model.Intarfaces;
-using ATS.TestAts;
 using ATS.User_Model;
 
 namespace ATS.Test
