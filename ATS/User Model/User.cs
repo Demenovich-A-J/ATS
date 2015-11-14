@@ -2,33 +2,31 @@
 
 namespace ATS.User_Model
 {
-    public abstract class User : IUser
+    public class User : IUser
     {
-        protected User(string name, ITerminal phone)
+        public User()
         {
-            Name = name;
-            Phone = phone;
+
         }
 
-        public string Name { get; }
-        public ITerminal Phone { get; }
+        public ITerminal Phone { get; set; }
 
-        public virtual void Call(PhoneNumber target)
+        public void Call(PhoneNumber target)
         {
             Phone.Call(target);
         }
 
-        public virtual void Drop()
+        public void Drop()
         {
             Phone.Drop();
         }
 
-        public virtual void Answer()
+        public void Answer()
         {
             Phone.Answer();
         }
 
-        public virtual void Plug()
+        public void Plug()
         {
             Phone.Plug();
         }
