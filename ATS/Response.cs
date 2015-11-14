@@ -2,9 +2,9 @@
 
 namespace ATS
 {
-    public class Responce
+    public class Response
     {
-        public Responce(ResponseState state, PhoneNumber source)
+        public Response(ResponseState state, PhoneNumber source)
         {
             State = state;
             Source = source;

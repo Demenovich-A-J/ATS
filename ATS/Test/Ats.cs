@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ATS.Station_Model.AbstractClasses;
 using ATS.Station_Model.Intarfaces;
 
-namespace ATS.TestAts
+namespace ATS.Test
 {
     public class Ats : Station
     {

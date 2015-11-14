@@ -3,7 +3,7 @@ using ATS.Station_Model.AbstractClasses;
 using ATS.Station_Model.Intarfaces;
 using ATS.Station_Model.States;
 
-namespace ATS.TestAts
+namespace ATS.Test
 {
     public class TestPort : Port
     {
