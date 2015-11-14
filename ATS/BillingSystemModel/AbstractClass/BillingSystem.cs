@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using ATS.BillingSystemModel.Intarfaces;
+using ATS.Helpers;
 using ATS.Station_Model.Intarfaces;
-using ATS.TestAts;
+using ATS.Test;
 using ATS.User_Model;
 
 namespace ATS.BillingSystemModel.AbstractClass
@@ -13,6 +14,7 @@ namespace ATS.BillingSystemModel.AbstractClass
         private readonly IDictionary<ITerminal, IUser> _terminalsUserMapp;
         private readonly IDictionary<IUser, ICollection<CallInfo>> _userCallinfoDictionary;
         private readonly IDictionary<IUser, ITariffPlan> _userTariffPlansMapp;
+        private readonly IDictionary<IUser, DateTime> _userDateTimesMapp; 
 
         private int _id;
 
@@ -23,23 +25,46 @@ namespace ATS.BillingSystemModel.AbstractClass
             _terminalsUserMapp = new Dictionary<ITerminal, IUser>();
             _userCallinfoDictionary = new Dictionary<IUser, ICollection<CallInfo>>();
             _userTariffPlansMapp = new Dictionary<IUser, ITariffPlan>();
+            _userDateTimesMapp = new Dictionary<IUser, DateTime>();
         }
 
         public ICollection<ITariffPlan> TariffPlans { get; }
 
+        protected IDictionary<IUser, ICollection<CallInfo>> UserCallinfoDictionary => _userCallinfoDictionary;
+
         public ITerminal GetContract(IUser user, ITariffPlan tariffPlan)
         {
-            var terminal = new TestTerminal(new PhoneNumber((10000 + _id).ToString()));
-            terminal.TariffPlan = tariffPlan;
+            var terminal = new TestTerminal(new PhoneNumber((10000 + _id).ToString()), tariffPlan);
             _id++;
 
             _userTariffPlansMapp.Add(user, tariffPlan);
-            _userCallinfoDictionary.Add(user, new List<CallInfo>());
+            UserCallinfoDictionary.Add(user, new List<CallInfo>());
             _terminalsUserMapp.Add(terminal, user);
+            _userDateTimesMapp.Add(user, TimeHelper.Now);
 
             return terminal;
         }
 
+        public void SetNewTariffPlan(IUser user, ITariffPlan tariffPlan)
+        {
+            var contractDate = GetContracDateTime(user);
+            if (contractDate > TimeHelper.Now)
+            {
+                _userTariffPlansMapp.Remove(user);
+                _userTariffPlansMapp.Add(user, tariffPlan);
+                _userDateTimesMapp.Remove(user);
+                _userDateTimesMapp.Add(user, TimeHelper.Now);
+            }
+            else
+            {
+                Console.WriteLine("Month has not yet passed");
+            }
+        }
+
+        protected DateTime GetContracDateTime(IUser user)
+        {
+            return _userDateTimesMapp.FirstOrDefault(x => x.Key == user).Value;
+        }
         public void CallInfoHandler(object sender, CallInfo callInfo)
         {
             var sourcePair = GetUserTerminalMapPair(callInfo.Source);
@@ -53,8 +78,8 @@ namespace ATS.BillingSystemModel.AbstractClass
 
             callInfo.Cost = CalculateCallCost(callInfo.Duration, GeTariffPlan(sourcePair.Value));
 
-            _userCallinfoDictionary[sourcePair.Value].Add(callInfo);
-            _userCallinfoDictionary[targetPair.Value].Add(targetCallInfo);
+            UserCallinfoDictionary[sourcePair.Value].Add(callInfo);
+            UserCallinfoDictionary[targetPair.Value].Add(targetCallInfo);
         }
 
         protected virtual double CalculateCallCost(TimeSpan duration, ITariffPlan userTariffPlan)
