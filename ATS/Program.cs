@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using ATS.BillingSystemModel.Intarfaces;
 using ATS.BillingSystemModel.TarifPlans;
+using ATS.Helpers;
 using ATS.Station_Model.Intarfaces;
 using ATS.Test;
-using ATS.TestAts;
 using ATS.User_Model;
 
 namespace ATS
@@ -31,6 +33,32 @@ namespace ATS
             user1.Call(user2.Phone.Number);
             user2.Answer();
             user2.Drop();
+            user1.Call(user2.Phone.Number);
+            user2.Answer();
+            user2.Drop();
+            user1.Call(user2.Phone.Number);
+            user2.Answer();
+            user2.Drop();
+            user1.Call(user2.Phone.Number);
+            user2.Answer();
+            user2.Drop();
+            user1.Call(user2.Phone.Number);
+            user2.Answer();
+            user2.Drop();
+            user2.Call(user1.Phone.Number);
+            user1.Answer();
+            user1.Drop();
+            
+            var d = velcome.GetStatistic((x => x.Cost < 100000), user1);
+            Console.WriteLine("===============================================================");
+
+            foreach (var v in d.ToList())
+            {
+                Console.WriteLine(v.State == CallInfoState.IncomingCall
+                    ? $"Abonent - {v.Target.Number} recive call from - {v.Source.Number};\nDuration : {v.Duration.TotalMinutes} (minutes);\nCost : {v.Cost};\nDate : {v.TimeBegin};"
+                    : $"Abonent - {v.Source.Number} call to - {v.Target.Number};\nDuration : {v.Duration.TotalMinutes} (minutes);\nCost : {v.Cost};\nDate : {v.TimeBegin};");
+                Console.WriteLine("===============================================================");
+            }
         }
     }
 }
