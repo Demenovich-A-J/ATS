@@ -7,8 +7,7 @@ namespace ATS.BillingSystemModel.Intarfaces
     public interface IBillingSystem
     {
         ICollection<ITariffPlan> TariffPlans { get; }
-        IDictionary<ITerminal,IUser> TerminalsUserMapp { get; }
-        ITerminal GetContract(IUser user);
+        ITerminal GetContract(IUser user, ITariffPlan tariffPlan);
         void CallInfoHandler(object sender,CallInfo callInfo);
     }
 }
