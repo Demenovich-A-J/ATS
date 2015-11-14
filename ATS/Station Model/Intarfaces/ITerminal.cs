@@ -9,7 +9,7 @@ namespace ATS.Station_Model.Intarfaces
         PhoneNumber Number { get; }
         ITariffPlan TariffPlan { get; }
         event EventHandler<CallInfo> OutgoingCall;
-        event EventHandler<Responce> Responce;
+        event EventHandler<Response> Responce;
         event EventHandler<PhoneNumber> IncomingRequest;
         event EventHandler Plugging;
         event EventHandler UnPlugging;

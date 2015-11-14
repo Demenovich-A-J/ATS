@@ -7,9 +7,10 @@ namespace ATS.Station_Model.AbstractClasses
 {
     public abstract class Terminal : ITerminal
     {
-        protected Terminal(PhoneNumber number)
+        protected Terminal(PhoneNumber number, ITariffPlan tariffPlan)
         {
             Number = number;
+            TariffPlan = tariffPlan;
         }
 
         private bool IsOnline { get; set; }
@@ -18,7 +19,7 @@ namespace ATS.Station_Model.AbstractClasses
         public ITariffPlan TariffPlan { get; set; }
 
         public event EventHandler<CallInfo> OutgoingCall;
-        public event EventHandler<Responce> Responce;
+        public event EventHandler<Response> Responce;
         public event EventHandler<PhoneNumber> IncomingRequest;
 
         public void GetReqest(PhoneNumber source)
@@ -36,20 +37,20 @@ namespace ATS.Station_Model.AbstractClasses
         public void Drop()
         {
             if(!IncomeCall) return;
-            OnResponce(this, new Responce(ResponseState.Drop, Number));
+            OnResponce(this, new Response(ResponseState.Drop, Number));
             IncomeCall = false;
         }
 
         public void Answer()
         {
             if (!IncomeCall) return;
-            OnResponce(this, new Responce(ResponseState.Accept, Number));
+            OnResponce(this, new Response(ResponseState.Accept, Number));
         }
 
         public void Reject()
         {
             if (!IncomeCall) return;
-            OnResponce(this, new Responce(ResponseState.Reject, Number));
+            OnResponce(this, new Response(ResponseState.Reject, Number));
             IncomeCall = false;
         }
 
@@ -92,7 +93,7 @@ namespace ATS.Station_Model.AbstractClasses
             };
         }
 
-        protected virtual void OnResponce(object sender, Responce responce)
+        protected virtual void OnResponce(object sender, Response responce)
         {
             Responce?.Invoke(this, responce);
         }
