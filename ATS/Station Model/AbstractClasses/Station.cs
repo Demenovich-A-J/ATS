@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using ATS.Helpers;
 using ATS.Station_Model.Intarfaces;
 using ATS.Station_Model.States;
 
@@ -26,22 +27,29 @@ namespace ATS.Station_Model.AbstractClasses
         }
 
 
-        protected virtual void InnerConnectionHandler(object sender, CallInfo info)
+        protected virtual void InnerConnectionHandler(object sender, CallInfo callInfo)
         {
-            var targetPort = GetPortByPhoneNumber(info.Target);
-            if (targetPort.State == PortState.Unpluged || targetPort.State == PortState.Call) return;
+            var targetPort = GetPortByPhoneNumber(callInfo.Target);
+            if (targetPort.State == PortState.Unpluged || targetPort.State == PortState.Call || callInfo.Source == callInfo.Target)
+            {
+                callInfo.TimeBegin = TimeHelper.Now;
+                callInfo.Duration = TimeSpan.Zero;
+                OnCallInfoPrepared(this, callInfo);
+            }
+            else
+            {
+                SetPortsStateTo(callInfo.Source, callInfo.Target, PortState.Call);
 
-            SetPortsStateTo(info.Source,info.Target,PortState.Call);
+                var targetTerminal = _terminalCollection.FirstOrDefault(x => x.Number == callInfo.Target);
 
-            var targetTerminal = _terminalCollection.FirstOrDefault(x => x.Number == info.Target);
-
-            targetTerminal?.GetReqest(info.Source);
-            _callInfoCollection.Add(info);
-            _waitActionTerminals.Add(targetTerminal);
+                targetTerminal?.GetReqest(callInfo.Source);
+                _callInfoCollection.Add(callInfo);
+                _waitActionTerminals.Add(targetTerminal);
+            }
         }
 
 
-        protected virtual void ResponseConnectionHandler(object sender, Responce responce)
+        protected virtual void ResponseConnectionHandler(object sender, Response responce)
         {
             var callInfo = GetCallInfo(responce.Source);
 
@@ -73,7 +81,7 @@ namespace ATS.Station_Model.AbstractClasses
 
             _activeCallMapping.Add(sourceTerminal, targetTerminal);
 
-            info.TimeBegin = DateTime.Now;
+            info.TimeBegin = TimeHelper.Now;
 
         }
 
@@ -87,8 +95,7 @@ namespace ATS.Station_Model.AbstractClasses
             var sourceTerminal = GetTerminalByPhoneNumber(info.Source);
             var targetTerminal = GetTerminalByPhoneNumber(info.Target);
 
-            Thread.Sleep(new Random().Next(5000, 10000));
-            info.Duration = info.TimeBegin - DateTime.Now;
+            info.Duration = TimeHelper.Duration();
 
             _waitActionTerminals.Remove(targetTerminal);
            
