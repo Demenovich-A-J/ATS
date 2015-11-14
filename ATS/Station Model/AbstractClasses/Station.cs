@@ -25,9 +25,6 @@ namespace ATS.Station_Model.AbstractClasses
             _activeCallMapping = new Dictionary<ITerminal, ITerminal>();
         }
 
-        public ICollection<ITerminal> TerminalCollection => _terminalCollection;
-
-        public ICollection<IPort> PortCollection => _portCollection;
 
         protected virtual void InnerConnectionHandler(object sender, CallInfo info)
         {
@@ -36,7 +33,7 @@ namespace ATS.Station_Model.AbstractClasses
 
             SetPortsStateTo(info.Source,info.Target,PortState.Call);
 
-            var targetTerminal = TerminalCollection.FirstOrDefault(x => x.Number == info.Target);
+            var targetTerminal = _terminalCollection.FirstOrDefault(x => x.Number == info.Target);
 
             targetTerminal?.GetReqest(info.Source);
             _callInfoCollection.Add(info);
@@ -54,6 +51,10 @@ namespace ATS.Station_Model.AbstractClasses
                     MakeCallActive(callInfo);
                     break;
                 case ResponseState.Drop:
+                    InterruptActiveCall(callInfo);
+                    OnCallInfoPrepared(this, callInfo);
+                    break;
+                case ResponseState.Reject:
                     InterruptCall(callInfo);
                     OnCallInfoPrepared(this, callInfo);
                     break;
@@ -78,22 +79,23 @@ namespace ATS.Station_Model.AbstractClasses
 
         private void InterruptCall(CallInfo info)
         {
+            _callInfoCollection.Remove(info);
+            SetPortsStateTo(info.Source, info.Target, PortState.Free);
+        }
+        private void InterruptActiveCall(CallInfo info)
+        {
             var sourceTerminal = GetTerminalByPhoneNumber(info.Source);
             var targetTerminal = GetTerminalByPhoneNumber(info.Target);
 
             Thread.Sleep(new Random().Next(5000, 10000));
             info.Duration = info.TimeBegin - DateTime.Now;
 
-            if (_waitActionTerminals.Contains(sourceTerminal))
-            {
-                _waitActionTerminals.Remove(targetTerminal);
-            }
-            if (_activeCallMapping.ContainsKey(sourceTerminal))
-            {
-                _activeCallMapping.Remove(new KeyValuePair<ITerminal, ITerminal>(sourceTerminal, targetTerminal));
-            }
+            _waitActionTerminals.Remove(targetTerminal);
+           
+            _activeCallMapping.Remove(new KeyValuePair<ITerminal, ITerminal>(sourceTerminal, targetTerminal));
 
             _callInfoCollection.Remove(info);
+
             SetPortsStateTo(info.Source, info.Target,PortState.Free);
         }
 
@@ -114,7 +116,7 @@ namespace ATS.Station_Model.AbstractClasses
 
         private ITerminal GetTerminalByPhoneNumber(PhoneNumber number)
         {
-            return TerminalCollection.FirstOrDefault(x => x.Number == number);
+            return _terminalCollection.FirstOrDefault(x => x.Number == number);
         }
 
         protected virtual CallInfo GetCallInfo(PhoneNumber target)
@@ -127,16 +129,22 @@ namespace ATS.Station_Model.AbstractClasses
             return _portsMapping[number];
         }
 
-        public void Add(ITerminal terminal)
+        public void AddPort(IPort port)
         {
-            var freePort = PortCollection.Except(_portsMapping.Values).FirstOrDefault();
-            if (freePort == null) return;
-            TerminalCollection.Add(terminal);
+            _portCollection.Add(port);
+        }
+        public bool Add(ITerminal terminal)
+        {
+            var freePort = _portCollection.Except(_portsMapping.Values).FirstOrDefault();
+            if (freePort == null) return false;
+            _terminalCollection.Add(terminal);
 
             MapTerminalToPort(terminal, freePort);
 
             RegisterEventHandlersForTerminal(terminal);
             RegisterEventHandlersForPort(freePort);
+
+            return true;
         }
 
         private void MapTerminalToPort(ITerminal terminal, IPort port)

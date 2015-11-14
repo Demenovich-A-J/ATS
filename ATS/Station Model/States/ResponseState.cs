@@ -3,6 +3,7 @@
     public enum ResponseState
     {
         Drop,
-        Accept
+        Accept,
+        Reject
     }
 }
