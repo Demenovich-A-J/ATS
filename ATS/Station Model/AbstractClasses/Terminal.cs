@@ -1,4 +1,5 @@
 ﻿using System;
+using ATS.BillingSystemModel.Intarfaces;
 using ATS.Station_Model.Intarfaces;
 using ATS.Station_Model.States;
 
@@ -11,8 +12,10 @@ namespace ATS.Station_Model.AbstractClasses
             Number = number;
         }
 
-        protected bool IsOnline { get; private set; }
+        private bool IsOnline { get; set; }
+        private bool IncomeCall { get; set; }
         public PhoneNumber Number { get; }
+        public ITariffPlan TariffPlan { get; set; }
 
         public event EventHandler<CallInfo> OutgoingCall;
         public event EventHandler<Responce> Responce;
@@ -20,6 +23,7 @@ namespace ATS.Station_Model.AbstractClasses
 
         public void GetReqest(PhoneNumber source)
         {
+            IncomeCall = true;
             OnIncomingRequest(source);
         }
 
@@ -31,12 +35,22 @@ namespace ATS.Station_Model.AbstractClasses
 
         public void Drop()
         {
+            if(!IncomeCall) return;
             OnResponce(this, new Responce(ResponseState.Drop, Number));
+            IncomeCall = false;
         }
 
         public void Answer()
         {
+            if (!IncomeCall) return;
             OnResponce(this, new Responce(ResponseState.Accept, Number));
+        }
+
+        public void Reject()
+        {
+            if (!IncomeCall) return;
+            OnResponce(this, new Responce(ResponseState.Reject, Number));
+            IncomeCall = false;
         }
 
         public void Call(PhoneNumber target)

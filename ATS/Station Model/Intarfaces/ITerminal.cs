@@ -1,4 +1,5 @@
 ﻿using System;
+using ATS.BillingSystemModel.Intarfaces;
 using ATS.Station_Model.States;
 
 namespace ATS.Station_Model.Intarfaces
@@ -6,6 +7,7 @@ namespace ATS.Station_Model.Intarfaces
     public interface ITerminal
     {
         PhoneNumber Number { get; }
+        ITariffPlan TariffPlan { get; }
         event EventHandler<CallInfo> OutgoingCall;
         event EventHandler<Responce> Responce;
         event EventHandler<PhoneNumber> IncomingRequest;
@@ -17,6 +19,7 @@ namespace ATS.Station_Model.Intarfaces
         void GetReqest(PhoneNumber source);
         void Drop();
         void Answer();
+        void Reject();
         void Plug();
         void Unplug();
         void Call(PhoneNumber target);
