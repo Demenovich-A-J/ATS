@@ -10,7 +10,6 @@ namespace ATS.Test
     {
         public Ats(ICollection<IPort> ports, ICollection<ITerminal> terminals) : base(ports, terminals)
         {
-
         }
 
 
@@ -36,7 +35,7 @@ namespace ATS.Test
             base.ResponseConnectionHandler(sender, responce);
         }
 
-        private void SetTerminalsStateTo(PhoneNumber source, PhoneNumber target,TerminalState state)
+        private void SetTerminalsStateTo(PhoneNumber source, PhoneNumber target, TerminalState state)
         {
             var sourceTerminal = GetTerminalByPhoneNumber(source) as TestTerminal;
             var targetTerminal = GetTerminalByPhoneNumber(target) as TestTerminal;

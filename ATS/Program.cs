@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using ATS.BillingSystemModel.Intarfaces;
 using ATS.BillingSystemModel.TarifPlans;
 using ATS.Helpers;
@@ -18,15 +17,15 @@ namespace ATS
             var ats = new Ats(new List<IPort>(), new List<ITerminal>());
             var velcome = new Velcome(new List<ITariffPlan>());
 
-            var panel = new ControlPanel(ats,velcome);
+            var panel = new ControlPanel(ats, velcome);
 
-            
+
             var user1 = new User();
             var user2 = new User();
 
 
-            user1.Phone = panel.GetContracTerminal(user1, new EasyTalk(25.1,0));
-            user2.Phone = panel.GetContracTerminal(user2, new EasyTalk(25.1, 0));
+            user1.Phone = velcome.GetContract(user1, new EasyTalk(25.1, 0));
+            user2.Phone = velcome.GetContract(user2, new EasyTalk(25.1, 0));
 
             user1.Plug();
             user2.Plug();
@@ -40,7 +39,14 @@ namespace ATS
             user2.Call(user1.Phone.Number);
             user1.Reject();
 
-            var d = velcome.GetStatistic((x => x.TimeBegin < DateTime.Now.AddMonths(2)), user2);
+            var c = TimeHelper.Now;
+            var g = TimeHelper.Now;
+            var t = TimeHelper.Now;
+
+
+            velcome.PayForPhoneNubmer(user1.Phone.Number);
+
+            var d = velcome.GetStatistic(x => x.TimeBegin < DateTime.Now.AddMonths(2), user2);
             Console.WriteLine("===============================================================");
 
             foreach (var v in d.ToList())

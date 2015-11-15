@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using ATS.Helpers;
 using ATS.Station_Model.Intarfaces;
 using ATS.Station_Model.States;
@@ -10,28 +9,40 @@ namespace ATS.Station_Model.AbstractClasses
 {
     public abstract class Station : IStation
     {
+        private readonly IDictionary<ITerminal, ITerminal> _activeCallMapping;
+        private readonly ICollection<CallInfo> _callInfoCollection;
         private readonly ICollection<IPort> _portCollection;
         private readonly ICollection<ITerminal> _terminalCollection;
-        private readonly ICollection<CallInfo> _callInfoCollection;
         private readonly ICollection<ITerminal> _waitActionTerminals;
-        private readonly IDictionary<ITerminal, ITerminal> _activeCallMapping;
-        private readonly IDictionary<PhoneNumber, IPort> _portsMapping;
+
         protected Station(ICollection<IPort> ports, ICollection<ITerminal> terminals)
         {
             _portCollection = ports;
             _terminalCollection = terminals;
-            _portsMapping = new Dictionary<PhoneNumber, IPort>();
+            PortsMapping = new Dictionary<PhoneNumber, IPort>();
             _callInfoCollection = new List<CallInfo>();
             _waitActionTerminals = new List<ITerminal>();
             _activeCallMapping = new Dictionary<ITerminal, ITerminal>();
         }
 
-        public IDictionary<PhoneNumber, IPort> PortsMapping => _portsMapping;
+        public IDictionary<PhoneNumber, IPort> PortsMapping { get; }
+
+        public abstract void RegisterEventHandlersForTerminal(ITerminal terminal);
+
+        public abstract void RegisterEventHandlersForPort(IPort port);
+
+        public event EventHandler<CallInfo> CallInfoPrepared;
+
+        public void ClearEvents()
+        {
+            CallInfoPrepared = null;
+        }
 
         protected virtual void InnerConnectionHandler(object sender, CallInfo callInfo)
         {
             var targetPort = GetPortByPhoneNumber(callInfo.Target);
-            if (targetPort.State == PortState.Unpluged || targetPort.State == PortState.Call || callInfo.Source == callInfo.Target)
+            if (targetPort.State == PortState.Unpluged || targetPort.State == PortState.Call ||
+                callInfo.Source == callInfo.Target)
             {
                 callInfo.TimeBegin = TimeHelper.Now;
                 callInfo.Duration = TimeSpan.Zero;
@@ -83,7 +94,6 @@ namespace ATS.Station_Model.AbstractClasses
             _activeCallMapping.Add(sourceTerminal, targetTerminal);
 
             info.TimeBegin = TimeHelper.Now;
-
         }
 
         private void InterruptCall(CallInfo info)
@@ -92,6 +102,7 @@ namespace ATS.Station_Model.AbstractClasses
             SetPortsStateTo(info.Source, info.Target, PortState.Free);
             info.TimeBegin = TimeHelper.Now;
         }
+
         private void InterruptActiveCall(CallInfo info)
         {
             var sourceTerminal = GetTerminalByPhoneNumber(info.Source);
@@ -100,12 +111,12 @@ namespace ATS.Station_Model.AbstractClasses
             info.Duration = TimeHelper.Duration();
 
             _waitActionTerminals.Remove(targetTerminal);
-           
+
             _activeCallMapping.Remove(new KeyValuePair<ITerminal, ITerminal>(sourceTerminal, targetTerminal));
 
             _callInfoCollection.Remove(info);
 
-            SetPortsStateTo(info.Source, info.Target,PortState.Free);
+            SetPortsStateTo(info.Source, info.Target, PortState.Free);
         }
 
         private void SetPortsStateTo(PhoneNumber source, PhoneNumber target, PortState state)
@@ -142,6 +153,7 @@ namespace ATS.Station_Model.AbstractClasses
         {
             _portCollection.Add(port);
         }
+
         public bool Add(ITerminal terminal)
         {
             var freePort = _portCollection.Except(PortsMapping.Values).FirstOrDefault();
@@ -168,20 +180,9 @@ namespace ATS.Station_Model.AbstractClasses
             PortsMapping.Remove(terminal.Number);
         }
 
-        public abstract void RegisterEventHandlersForTerminal(ITerminal terminal);
-
-        public abstract void RegisterEventHandlersForPort(IPort port);
-
-        public event EventHandler<CallInfo> CallInfoPrepared;
-
-        protected virtual void OnCallInfoPrepared(object sender,CallInfo callInfo)
+        protected virtual void OnCallInfoPrepared(object sender, CallInfo callInfo)
         {
             CallInfoPrepared?.Invoke(this, callInfo);
-        }
-
-        public void ClearEvents()
-        {
-            CallInfoPrepared = null;
         }
     }
 }

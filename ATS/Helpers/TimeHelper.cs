@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Threading;
 
 namespace ATS.Helpers
 {
     public static class TimeHelper
     {
-        private static int _counter = 0;
+        private static int _counter;
+
+        public static EventHandler<DateTime> NewDateTime;
 
         public static DateTime Now
         {
@@ -17,8 +18,6 @@ namespace ATS.Helpers
                 return date;
             }
         }
-
-        public static EventHandler<DateTime> NewDateTime;
 
         private static void OnNewDateTime(object sender, DateTime time)
         {

@@ -12,7 +12,6 @@ namespace ATS.Test
             terminal.Plugging += (port, args) => { State = PortState.Free; };
             terminal.UnPlugging += (port, args) => { State = PortState.Unpluged; };
             StateChanged += (sender, state) => { Console.WriteLine($"Port detect change his State to {State}"); };
-
         }
     }
 }

@@ -4,11 +4,6 @@ namespace ATS.User_Model
 {
     public class User : IUser
     {
-        public User()
-        {
-
-        }
-
         public ITerminal Phone { get; set; }
 
         public void Call(PhoneNumber target)

@@ -26,12 +26,6 @@ namespace ATS.Station_Model.AbstractClasses
             OnIncomingRequest(source);
         }
 
-
-        protected virtual void OnIncomingRequest(PhoneNumber source)
-        {
-            IncomingRequest?.Invoke(this, source);
-        }
-
         public virtual void Drop()
         {
             OnResponce(this, new Response(ResponseState.Drop, Number));
@@ -51,7 +45,7 @@ namespace ATS.Station_Model.AbstractClasses
         {
             if (IsOnline)
             {
-                OnOutgoingCall(this, new CallInfo(target, Number,CallInfoState.OutGoingCall));
+                OnOutgoingCall(this, new CallInfo(target, Number, CallInfoState.OutGoingCall));
             }
         }
 
@@ -63,14 +57,14 @@ namespace ATS.Station_Model.AbstractClasses
 
         public void Plug()
         {
-            if(IsOnline) return;
+            if (IsOnline) return;
             OnPlugging(this, null);
             IsOnline = true;
         }
 
         public void Unplug()
         {
-            if(IsOnline == false) return;
+            if (IsOnline == false) return;
             OnUnPlugging(this, null);
             IsOnline = false;
         }
@@ -79,11 +73,25 @@ namespace ATS.Station_Model.AbstractClasses
         {
             port.StateChanged += (sender, state) =>
             {
-                if(state == PortState.Unpluged)
+                if (state == PortState.Unpluged)
                     OnOffline(sender, null);
-                if(state == PortState.Free)
-                    OnOnline(sender,null);
+                if (state == PortState.Free)
+                    OnOnline(sender, null);
             };
+        }
+
+        public void ClearEvents()
+        {
+            OutgoingCall = null;
+            Plugging = null;
+            Responce = null;
+            UnPlugging = null;
+        }
+
+
+        protected virtual void OnIncomingRequest(PhoneNumber source)
+        {
+            IncomingRequest?.Invoke(this, source);
         }
 
         protected virtual void OnResponce(object sender, Response responce)
@@ -117,17 +125,6 @@ namespace ATS.Station_Model.AbstractClasses
         protected virtual void OnUnPlugging(object sender, EventArgs args)
         {
             UnPlugging?.Invoke(this, args);
-        }
-
-        public void ClearEvents()
-        {
-            Online = null;
-            IncomingRequest = null;
-            Offline = null;
-            OutgoingCall = null;
-            Plugging = null;
-            Responce = null;
-            UnPlugging = null;
         }
     }
 }

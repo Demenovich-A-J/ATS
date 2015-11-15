@@ -25,6 +25,12 @@ namespace ATS.Station_Model.AbstractClasses
         public event EventHandler<PortState> StateChanged;
         public abstract void RegisterEventHandlersForTerminal(ITerminal terminal);
 
+        public void ClearEvents()
+        {
+            StateChanged = null;
+            StateChanging = null;
+        }
+
         protected virtual void OnStateChanging(object sender, PortState newstate)
         {
             StateChanging?.Invoke(this, newstate);
@@ -33,12 +39,6 @@ namespace ATS.Station_Model.AbstractClasses
         protected virtual void OnStateChanged(object sender, PortState state)
         {
             StateChanged?.Invoke(this, state);
-        }
-
-        public void ClearEvents()
-        {
-            StateChanged = null;
-            StateChanging = null;
         }
     }
 }

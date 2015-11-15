@@ -2,14 +2,12 @@
 {
     public struct PhoneNumber
     {
-        private readonly string _number;
-
         public PhoneNumber(string number)
         {
-            _number = number;
+            Number = number;
         }
 
-        public string Number => _number;
+        public string Number { get; }
 
         public override bool Equals(object obj)
         {
@@ -31,7 +29,7 @@
             return Number?.GetHashCode() ?? 0;
         }
 
-        public static bool operator == (PhoneNumber x, PhoneNumber y)
+        public static bool operator ==(PhoneNumber x, PhoneNumber y)
         {
             return x.Equals(y);
         }

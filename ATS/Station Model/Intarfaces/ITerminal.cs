@@ -1,6 +1,5 @@
 ﻿using System;
 using ATS.BillingSystemModel.Intarfaces;
-using ATS.Station_Model.States;
 
 namespace ATS.Station_Model.Intarfaces
 {
