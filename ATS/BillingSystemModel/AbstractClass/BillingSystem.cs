@@ -32,6 +32,8 @@ namespace ATS.BillingSystemModel.AbstractClass
 
         protected IDictionary<IUser, ICollection<CallInfo>> UserCallinfoDictionary => _userCallinfoDictionary;
 
+        public IDictionary<IUser, DateTime> UserDateTimesMapp => _userDateTimesMapp;
+
         public ITerminal GetContract(IUser user, ITariffPlan tariffPlan)
         {
             var terminal = new TestTerminal(new PhoneNumber((10000 + _id).ToString()), tariffPlan);
@@ -40,7 +42,7 @@ namespace ATS.BillingSystemModel.AbstractClass
             _userTariffPlansMapp.Add(user, tariffPlan);
             UserCallinfoDictionary.Add(user, new List<CallInfo>());
             _terminalsUserMapp.Add(terminal, user);
-            _userDateTimesMapp.Add(user, TimeHelper.Now);
+            UserDateTimesMapp.Add(user, TimeHelper.Now);
 
             return terminal;
         }
@@ -52,8 +54,8 @@ namespace ATS.BillingSystemModel.AbstractClass
             {
                 _userTariffPlansMapp.Remove(user);
                 _userTariffPlansMapp.Add(user, tariffPlan);
-                _userDateTimesMapp.Remove(user);
-                _userDateTimesMapp.Add(user, TimeHelper.Now);
+                UserDateTimesMapp.Remove(user);
+                UserDateTimesMapp.Add(user, TimeHelper.Now);
             }
             else
             {
@@ -63,7 +65,7 @@ namespace ATS.BillingSystemModel.AbstractClass
 
         protected DateTime GetContracDateTime(IUser user)
         {
-            return _userDateTimesMapp.FirstOrDefault(x => x.Key == user).Value;
+            return UserDateTimesMapp.FirstOrDefault(x => x.Key == user).Value;
         }
         public void CallInfoHandler(object sender, CallInfo callInfo)
         {

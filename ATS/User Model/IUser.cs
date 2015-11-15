@@ -8,6 +8,7 @@ namespace ATS.User_Model
         void Call(PhoneNumber target);
         void Drop();
         void Answer();
+        void Reject();
         void Plug();
         void UnPlug();
     }

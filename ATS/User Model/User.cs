@@ -26,6 +26,11 @@ namespace ATS.User_Model
             Phone.Answer();
         }
 
+        public void Reject()
+        {
+            Phone.Reject();
+        }
+
         public void Plug()
         {
             Phone.Plug();

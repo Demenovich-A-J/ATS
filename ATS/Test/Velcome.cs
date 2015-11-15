@@ -18,7 +18,7 @@ namespace ATS.Test
 
         public IEnumerable<CallInfo> GetStatistic(Func<CallInfo,bool> predicat ,IUser user)
         {
-            return UserCallinfoDictionary.FirstOrDefault(x => x.Key == user).Value.Where(predicat); ;
+            return UserCallinfoDictionary.FirstOrDefault(x => x.Key == user).Value.Where(predicat);
         }
 
     }
