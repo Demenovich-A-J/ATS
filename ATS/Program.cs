@@ -20,6 +20,7 @@ namespace ATS
 
             var panel = new ControlPanel(ats,velcome);
 
+            
             var user1 = new User();
             var user2 = new User();
 
@@ -33,23 +34,13 @@ namespace ATS
             user1.Call(user2.Phone.Number);
             user2.Answer();
             user2.Drop();
-            user1.Call(user2.Phone.Number);
-            user2.Answer();
-            user2.Drop();
-            user1.Call(user2.Phone.Number);
-            user2.Answer();
-            user2.Drop();
-            user1.Call(user2.Phone.Number);
-            user2.Answer();
-            user2.Drop();
-            user1.Call(user2.Phone.Number);
-            user2.Answer();
-            user2.Drop();
             user2.Call(user1.Phone.Number);
             user1.Answer();
             user1.Drop();
-            
-            var d = velcome.GetStatistic((x => x.Cost < 100000), user1);
+            user2.Call(user1.Phone.Number);
+            user1.Reject();
+
+            var d = velcome.GetStatistic((x => x.TimeBegin < DateTime.Now.AddMonths(2)), user2);
             Console.WriteLine("===============================================================");
 
             foreach (var v in d.ToList())
