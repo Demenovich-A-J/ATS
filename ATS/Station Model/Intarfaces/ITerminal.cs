@@ -4,7 +4,7 @@ using ATS.Station_Model.States;
 
 namespace ATS.Station_Model.Intarfaces
 {
-    public interface ITerminal
+    public interface ITerminal : IShouldClearEventHandlers
     {
         PhoneNumber Number { get; }
         ITariffPlan TariffPlan { get; }

@@ -34,5 +34,11 @@ namespace ATS.Station_Model.AbstractClasses
         {
             StateChanged?.Invoke(this, state);
         }
+
+        public void ClearEvents()
+        {
+            StateChanged = null;
+            StateChanging = null;
+        }
     }
 }

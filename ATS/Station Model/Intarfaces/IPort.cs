@@ -3,7 +3,7 @@ using ATS.Station_Model.States;
 
 namespace ATS.Station_Model.Intarfaces
 {
-    public interface IPort
+    public interface IPort : IShouldClearEventHandlers
     {
         PortState State { get; set; }
         event EventHandler<PortState> StateChanging;

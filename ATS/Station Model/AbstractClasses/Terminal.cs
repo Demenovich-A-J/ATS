@@ -14,7 +14,6 @@ namespace ATS.Station_Model.AbstractClasses
         }
 
         private bool IsOnline { get; set; }
-        private bool IncomeCall { get; set; }
         public PhoneNumber Number { get; }
         public ITariffPlan TariffPlan { get; set; }
 
@@ -24,7 +23,6 @@ namespace ATS.Station_Model.AbstractClasses
 
         public void GetReqest(PhoneNumber source)
         {
-            IncomeCall = true;
             OnIncomingRequest(source);
         }
 
@@ -34,27 +32,22 @@ namespace ATS.Station_Model.AbstractClasses
             IncomingRequest?.Invoke(this, source);
         }
 
-        public void Drop()
+        public virtual void Drop()
         {
-            if(!IncomeCall) return;
             OnResponce(this, new Response(ResponseState.Drop, Number));
-            IncomeCall = false;
         }
 
-        public void Answer()
+        public virtual void Answer()
         {
-            if (!IncomeCall) return;
             OnResponce(this, new Response(ResponseState.Accept, Number));
         }
 
-        public void Reject()
+        public virtual void Reject()
         {
-            if (!IncomeCall) return;
             OnResponce(this, new Response(ResponseState.Reject, Number));
-            IncomeCall = false;
         }
 
-        public void Call(PhoneNumber target)
+        public virtual void Call(PhoneNumber target)
         {
             if (IsOnline)
             {
@@ -124,6 +117,17 @@ namespace ATS.Station_Model.AbstractClasses
         protected virtual void OnUnPlugging(object sender, EventArgs args)
         {
             UnPlugging?.Invoke(this, args);
+        }
+
+        public void ClearEvents()
+        {
+            Online = null;
+            IncomingRequest = null;
+            Offline = null;
+            OutgoingCall = null;
+            Plugging = null;
+            Responce = null;
+            UnPlugging = null;
         }
     }
 }
