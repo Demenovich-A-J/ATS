@@ -12,27 +12,33 @@ namespace ATS.BillingSystemModel.AbstractClass
     public abstract class BillingSystem : IBillingSystem
     {
         private readonly IDictionary<ITerminal, IUser> _terminalsUserMapp;
-        private readonly IDictionary<IUser, ICollection<CallInfo>> _userCallinfoDictionary;
         private readonly IDictionary<IUser, ITariffPlan> _userTariffPlansMapp;
-        private readonly IDictionary<IUser, DateTime> _userDateTimesMapp; 
+        private IDictionary<IUser, DateTime> _userPayDateTime; 
 
         private int _id;
-
 
         protected BillingSystem(ICollection<ITariffPlan> tariffPlans)
         {
             TariffPlans = tariffPlans;
             _terminalsUserMapp = new Dictionary<ITerminal, IUser>();
-            _userCallinfoDictionary = new Dictionary<IUser, ICollection<CallInfo>>();
+            UserCallinfoDictionary = new Dictionary<IUser, ICollection<CallInfo>>();
             _userTariffPlansMapp = new Dictionary<IUser, ITariffPlan>();
-            _userDateTimesMapp = new Dictionary<IUser, DateTime>();
+            UserRegistryDateTimeMapp = new Dictionary<IUser, DateTime>();
+            _userPayDateTime = new Dictionary<IUser, DateTime>();
         }
+
+        protected IDictionary<IUser, ICollection<CallInfo>> UserCallinfoDictionary { get; }
+
+        public IDictionary<IUser, DateTime> UserRegistryDateTimeMapp { get; }
 
         public ICollection<ITariffPlan> TariffPlans { get; }
 
-        protected IDictionary<IUser, ICollection<CallInfo>> UserCallinfoDictionary => _userCallinfoDictionary;
+        public IDictionary<IUser, DateTime> UserPayDateTime
+        {
+            get { return _userPayDateTime; }
+            set { _userPayDateTime = value; }
+        }
 
-        public IDictionary<IUser, DateTime> UserDateTimesMapp => _userDateTimesMapp;
 
         public ITerminal GetContract(IUser user, ITariffPlan tariffPlan)
         {
@@ -42,31 +48,13 @@ namespace ATS.BillingSystemModel.AbstractClass
             _userTariffPlansMapp.Add(user, tariffPlan);
             UserCallinfoDictionary.Add(user, new List<CallInfo>());
             _terminalsUserMapp.Add(terminal, user);
-            UserDateTimesMapp.Add(user, TimeHelper.Now);
-
+            var date = TimeHelper.Now;
+            UserRegistryDateTimeMapp.Add(user, date);
+            _userPayDateTime.Add(user, date);
+            OnToSignСontract(terminal);
             return terminal;
         }
 
-        public void SetNewTariffPlan(IUser user, ITariffPlan tariffPlan)
-        {
-            var contractDate = GetContracDateTime(user);
-            if (contractDate > TimeHelper.Now)
-            {
-                _userTariffPlansMapp.Remove(user);
-                _userTariffPlansMapp.Add(user, tariffPlan);
-                UserDateTimesMapp.Remove(user);
-                UserDateTimesMapp.Add(user, TimeHelper.Now);
-            }
-            else
-            {
-                Console.WriteLine("Month has not yet passed");
-            }
-        }
-
-        protected DateTime GetContracDateTime(IUser user)
-        {
-            return UserDateTimesMapp.FirstOrDefault(x => x.Key == user).Value;
-        }
         public void CallInfoHandler(object sender, CallInfo callInfo)
         {
             var sourcePair = GetUserTerminalMapPair(callInfo.Source);
@@ -82,6 +70,29 @@ namespace ATS.BillingSystemModel.AbstractClass
 
             UserCallinfoDictionary[sourcePair.Value].Add(callInfo);
             UserCallinfoDictionary[targetPair.Value].Add(targetCallInfo);
+        }
+
+
+
+        public void SetNewTariffPlan(IUser user, ITariffPlan tariffPlan)
+        {
+            var contractDate = GetContracDateTime(user);
+            if (contractDate > TimeHelper.Now)
+            {
+                _userTariffPlansMapp.Remove(user);
+                _userTariffPlansMapp.Add(user, tariffPlan);
+                UserRegistryDateTimeMapp.Remove(user);
+                UserRegistryDateTimeMapp.Add(user, TimeHelper.Now);
+            }
+            else
+            {
+                Console.WriteLine("Month has not yet passed");
+            }
+        }
+
+        protected DateTime GetContracDateTime(IUser user)
+        {
+            return UserRegistryDateTimeMapp.FirstOrDefault(x => x.Key == user).Value;
         }
 
         protected virtual double CalculateCallCost(TimeSpan duration, ITariffPlan userTariffPlan)
@@ -117,6 +128,25 @@ namespace ATS.BillingSystemModel.AbstractClass
         public void AddNewTariffPlan(ITariffPlan tariffPlan)
         {
             TariffPlans.Add(tariffPlan);
+        }
+
+        public event EventHandler<ITerminal> ToSignСontract; 
+        public event EventHandler<IUser> Pay;
+
+        public void PayForPhoneNubmer(PhoneNumber phoneNumber)
+        {
+            OnPay(_terminalsUserMapp.FirstOrDefault(x => x.Key.Number == phoneNumber).Value);
+        }
+
+        protected virtual void OnPay(IUser user)
+        {
+            Pay?.Invoke(this, user);
+        }
+
+
+        protected virtual void OnToSignСontract(ITerminal terminal)
+        {
+            ToSignСontract?.Invoke(this, terminal);
         }
     }
 }

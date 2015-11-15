@@ -13,47 +13,64 @@ namespace ATS.Test
 {
     public class ControlPanel
     {
-
         private readonly Station _ats;
-        private readonly BillingSystem _bilingSystem;
-        private readonly ICollection<IUser> _disconectedUserCollection; 
+        private readonly BillingSystem _billingSystem;
+        private readonly ICollection<IUser> _disconectedUserCollection;
+
         public ControlPanel(Station ats, BillingSystem bilingSystem)
         {
             _ats = ats;
-            _bilingSystem = bilingSystem;
+            _billingSystem = bilingSystem;
             _disconectedUserCollection = new List<IUser>();
-            _ats.CallInfoPrepared += _bilingSystem.CallInfoHandler;
+            _ats.CallInfoPrepared += _billingSystem.CallInfoHandler;
             TimeHelper.NewDateTime += DateChangeHandler;
+            _billingSystem.Pay += PayHandler;
+            _billingSystem.ToSignСontract += GetContracTerminal;
+
         }
 
-        public ITerminal GetContracTerminal(IUser user,ITariffPlan tariffPlan)
+        public void GetContracTerminal(object sender,ITerminal terminal)
         {
-            var terminal = _bilingSystem.GetContract(user, tariffPlan);
-
-            if (_ats.Add(terminal))
-            {
-                return terminal;
-            }
-
+            if (_ats.Add(terminal)) return;
             _ats.AddPort(new TestPort());
             _ats.Add(terminal);
-
-            return terminal;
         }
 
         private void DateChangeHandler(object sender, DateTime time)
         {
-            foreach (var info in _bilingSystem.UserDateTimesMapp.Where(info => info.Value.AddMonths(2) <= time).Where(info => !_disconectedUserCollection.Contains(info.Key)))
+            foreach (
+                var info in
+                    _billingSystem.UserPayDateTime.Where(info => info.Value.AddMonths(2) <= time)
+                        .Where(info => !_disconectedUserCollection.Contains(info.Key)))
             {
                 info.Key.Drop();
+                info.Key.Phone.Unplug();
                 info.Key.Phone.ClearEvents();
+                _ats.PortsMapping[info.Key.Phone.Number].ClearEvents();
+                _disconectedUserCollection.Add(info.Key);
 
                 Console.WriteLine("|=====================================================|");
-                _ats.PortsMapping[info.Key.Phone.Number].State = PortState.Unpluged;
-                _disconectedUserCollection.Add(info.Key);
-                Console.WriteLine($"Abonent : {info.Key.Phone.Number.Number}; Was disconect from station. Because of non-payment;");
+                Console.WriteLine(
+                    $"Abonent : {info.Key.Phone.Number.Number}; Was disconect from station. Because of non-payment;");
                 Console.WriteLine("|=====================================================|");
             }
+        }
+
+        private void PayHandler(object sender, IUser user)
+        {
+            if(!_disconectedUserCollection.Contains(user)) return;
+
+            var sourcePort = _ats.PortsMapping[user.Phone.Number];
+
+            _billingSystem.UserPayDateTime[user] = TimeHelper.Now;
+            _ats.PortsMapping[user.Phone.Number].RegisterEventHandlersForTerminal(user.Phone);
+            _ats.RegisterEventHandlersForTerminal(user.Phone);
+            _ats.RegisterEventHandlersForPort(sourcePort);
+            user.Phone.RegisterEventHandlersForPort(sourcePort);
+            user.Plug();
+            _disconectedUserCollection.Remove(user);
+
+            Console.WriteLine($"Abonent : {user.Phone.Number.Number}; Pay for his phone. And can resume calls.");
         }
     }
 }
