@@ -12,8 +12,17 @@ namespace ATS.Helpers
             get
             {
                 _counter++;
-                return DateTime.Now.Add(new TimeSpan(5 * _counter, 0, 10 * _counter, 5 * _counter));
+                var date = DateTime.Now.Add(new TimeSpan(10*_counter, 0, 10*_counter, 5*_counter));
+                OnNewDateTime(null, date);
+                return date;
             }
+        }
+
+        public static EventHandler<DateTime> NewDateTime;
+
+        private static void OnNewDateTime(object sender, DateTime time)
+        {
+            NewDateTime?.Invoke(null, time);
         }
 
         public static TimeSpan Duration()
