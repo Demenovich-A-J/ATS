@@ -40,19 +40,31 @@ namespace ATS.Test
         {
             foreach (
                 var info in
-                    _billingSystem.UserPayDateTime.Where(info => info.Value.AddMonths(2) <= time)
+                    _billingSystem.UserPayDateTime
                         .Where(info => !_disconectedUserCollection.Contains(info.Key)))
             {
-                info.Key.Drop();
-                info.Key.Phone.Unplug();
-                info.Key.Phone.ClearEvents();
-                _ats.PortsMapping[info.Key.Phone.Number].ClearEvents();
-                _disconectedUserCollection.Add(info.Key);
+                if (info.Value.AddMonths(1) <= time)
+                {
+                    Console.WriteLine("|=====================================================|");
+                    Console.WriteLine(
+                        $"Abonent : {info.Key.Phone.Number.Number}; You need to pay for previous month before {info.Value.AddMonths(1)};");
+                    Console.WriteLine("|=====================================================|");
+                }
 
-                Console.WriteLine("|=====================================================|");
-                Console.WriteLine(
-                    $"Abonent : {info.Key.Phone.Number.Number}; Was disconect from station. Because of non-payment;");
-                Console.WriteLine("|=====================================================|");
+
+                    if (info.Value.AddMonths(2) <= time)
+                {
+                    info.Key.Drop();
+                    info.Key.Phone.Unplug();
+                    info.Key.Phone.ClearEvents();
+                    _ats.PortsMapping[info.Key.Phone.Number].ClearEvents();
+                    _disconectedUserCollection.Add(info.Key);
+
+                    Console.WriteLine("|=====================================================|");
+                    Console.WriteLine(
+                        $"Abonent : {info.Key.Phone.Number.Number}; Was disconect from station. Because of non-payment;");
+                    Console.WriteLine("|=====================================================|");
+                }
             }
         }
 
