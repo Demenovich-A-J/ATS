@@ -13,8 +13,8 @@ namespace ATS.BillingSystemModel.AbstractClass
     {
         private readonly IDictionary<ITerminal, IUser> _terminalsUserMapp;
         private readonly IDictionary<IUser, ITariffPlan> _userTariffPlansMapp;
-        private IDictionary<IUser, DateTime> _userPayDateTime; 
-
+        private IDictionary<IUser, DateTime> _userPayDateTime;
+        private IDictionary<IUser, DateTime> _userRegistryDateTimeMapp;
         private int _id;
 
         protected BillingSystem(ICollection<ITariffPlan> tariffPlans)
@@ -23,13 +23,12 @@ namespace ATS.BillingSystemModel.AbstractClass
             _terminalsUserMapp = new Dictionary<ITerminal, IUser>();
             UserCallinfoDictionary = new Dictionary<IUser, ICollection<CallInfo>>();
             _userTariffPlansMapp = new Dictionary<IUser, ITariffPlan>();
-            UserRegistryDateTimeMapp = new Dictionary<IUser, DateTime>();
+            _userRegistryDateTimeMapp = new Dictionary<IUser, DateTime>();
             _userPayDateTime = new Dictionary<IUser, DateTime>();
         }
 
         protected IDictionary<IUser, ICollection<CallInfo>> UserCallinfoDictionary { get; }
 
-        public IDictionary<IUser, DateTime> UserRegistryDateTimeMapp { get; }
 
         public ICollection<ITariffPlan> TariffPlans { get; }
 
@@ -49,7 +48,7 @@ namespace ATS.BillingSystemModel.AbstractClass
             UserCallinfoDictionary.Add(user, new List<CallInfo>());
             _terminalsUserMapp.Add(terminal, user);
             var date = TimeHelper.Now;
-            UserRegistryDateTimeMapp.Add(user, date);
+            _userRegistryDateTimeMapp.Add(user, date);
             _userPayDateTime.Add(user, date);
             OnToSignСontract(terminal);
             return terminal;
@@ -66,7 +65,7 @@ namespace ATS.BillingSystemModel.AbstractClass
                 Cost = 0
             };
 
-            callInfo.Cost = CalculateCallCost(callInfo.Duration, GeTariffPlan(sourcePair.Value));
+            callInfo.Cost = sourcePair.Key.TariffPlan.CalculateCallCost(callInfo.Duration);
 
             UserCallinfoDictionary[sourcePair.Value].Add(callInfo);
             UserCallinfoDictionary[targetPair.Value].Add(targetCallInfo);
@@ -81,8 +80,8 @@ namespace ATS.BillingSystemModel.AbstractClass
             {
                 _userTariffPlansMapp.Remove(user);
                 _userTariffPlansMapp.Add(user, tariffPlan);
-                UserRegistryDateTimeMapp.Remove(user);
-                UserRegistryDateTimeMapp.Add(user, TimeHelper.Now);
+                _userRegistryDateTimeMapp.Remove(user);
+                _userRegistryDateTimeMapp.Add(user, TimeHelper.Now);
             }
             else
             {
@@ -90,32 +89,12 @@ namespace ATS.BillingSystemModel.AbstractClass
             }
         }
 
-        protected DateTime GetContracDateTime(IUser user)
+        private DateTime GetContracDateTime(IUser user)
         {
-            return UserRegistryDateTimeMapp.FirstOrDefault(x => x.Key == user).Value;
+            return _userRegistryDateTimeMapp.FirstOrDefault(x => x.Key == user).Value;
         }
 
-        protected virtual double CalculateCallCost(TimeSpan duration, ITariffPlan userTariffPlan)
-        {
-            if (userTariffPlan.FreeMinutes != 0)
-            {
-                if (userTariffPlan.FreeMinutes - Math.Abs(duration.TotalMinutes) < 0)
-                {
-                    userTariffPlan.FreeMinutes = 0;
-
-                    return userTariffPlan.CostOneMinute*
-                           (Math.Abs(duration.TotalMinutes) - userTariffPlan.FreeMinutes);
-                }
-
-                userTariffPlan.FreeMinutes -= Math.Abs(duration.TotalMinutes);
-
-                return 0;
-            }
-
-            return userTariffPlan.CostOneMinute*Math.Abs(duration.TotalMinutes);
-        }
-
-        protected KeyValuePair<ITerminal, IUser> GetUserTerminalMapPair(PhoneNumber number)
+        private KeyValuePair<ITerminal, IUser> GetUserTerminalMapPair(PhoneNumber number)
         {
             return _terminalsUserMapp.FirstOrDefault(x => x.Key.Number == number);
         }
