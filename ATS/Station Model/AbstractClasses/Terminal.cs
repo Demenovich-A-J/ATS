@@ -21,7 +21,7 @@ namespace ATS.Station_Model.AbstractClasses
         public event EventHandler<Response> Responce;
         public event EventHandler<PhoneNumber> IncomingRequest;
 
-        public void GetReqest(PhoneNumber source)
+        public virtual void GetReqest(PhoneNumber source)
         {
             OnIncomingRequest(source);
         }
@@ -45,7 +45,7 @@ namespace ATS.Station_Model.AbstractClasses
         {
             if (IsOnline)
             {
-                OnOutgoingCall(this, new CallInfo(target, Number, CallInfoState.OutGoingCall));
+                OnOutgoingCall(this, new CallInfo(target, Number, TerminalState.OutGoingCall));
             }
         }
 

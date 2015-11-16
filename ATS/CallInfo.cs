@@ -1,10 +1,11 @@
 ﻿using System;
+using ATS.Station_Model.States;
 
 namespace ATS
 {
     public class CallInfo
     {
-        public CallInfo(PhoneNumber target, PhoneNumber source, CallInfoState state)
+        public CallInfo(PhoneNumber target, PhoneNumber source, TerminalState state)
         {
             Target = target;
             Source = source;
@@ -18,7 +19,7 @@ namespace ATS
         public DateTime TimeBegin { get; set; }
 
         public TimeSpan Duration { get; set; }
-        public CallInfoState State { get; }
+        public TerminalState State { get; }
         public double Cost { get; set; }
     }
 }

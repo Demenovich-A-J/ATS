@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using ATS.BillingSystemModel.AbstractClass;
-using ATS.BillingSystemModel.Intarfaces;
 using ATS.Helpers;
 using ATS.Station_Model.AbstractClasses;
 using ATS.Station_Model.Intarfaces;
-using ATS.Station_Model.States;
 using ATS.User_Model;
 
 namespace ATS.Test
@@ -25,11 +23,10 @@ namespace ATS.Test
             _ats.CallInfoPrepared += _billingSystem.CallInfoHandler;
             TimeHelper.NewDateTime += DateChangeHandler;
             _billingSystem.Pay += PayHandler;
-            _billingSystem.ToSignСontract += GetContracTerminal;
-
+            _billingSystem.ToSignСontract += GetContracHandler;
         }
 
-        public void GetContracTerminal(object sender,ITerminal terminal)
+        private void GetContracHandler(object sender, ITerminal terminal)
         {
             if (_ats.Add(terminal)) return;
             _ats.AddPort(new TestPort());
@@ -38,39 +35,26 @@ namespace ATS.Test
 
         private void DateChangeHandler(object sender, DateTime time)
         {
-            foreach (
-                var info in
-                    _billingSystem.UserPayDateTime
-                        .Where(info => !_disconectedUserCollection.Contains(info.Key)))
+            foreach (var info in _billingSystem.UserPayDateTime
+                .Where(info => !_disconectedUserCollection.Contains(info.Key))
+                .Where(info => info.Value.AddMonths(2) <= time))
             {
-                if (info.Value.AddMonths(1) <= time)
-                {
-                    Console.WriteLine("|=====================================================|");
-                    Console.WriteLine(
-                        $"Abonent : {info.Key.Phone.Number.Number}; You need to pay for previous month before {info.Value.AddMonths(1)};");
-                    Console.WriteLine("|=====================================================|");
-                }
+                info.Key.Drop();
+                info.Key.Phone.Unplug();
+                info.Key.Phone.ClearEvents();
+                _ats.PortsMapping[info.Key.Phone.Number].ClearEvents();
+                _disconectedUserCollection.Add(info.Key);
 
-
-                    if (info.Value.AddMonths(2) <= time)
-                {
-                    info.Key.Drop();
-                    info.Key.Phone.Unplug();
-                    info.Key.Phone.ClearEvents();
-                    _ats.PortsMapping[info.Key.Phone.Number].ClearEvents();
-                    _disconectedUserCollection.Add(info.Key);
-
-                    Console.WriteLine("|=====================================================|");
-                    Console.WriteLine(
-                        $"Abonent : {info.Key.Phone.Number.Number}; Was disconect from station. Because of non-payment;");
-                    Console.WriteLine("|=====================================================|");
-                }
+                Console.WriteLine("|=====================================================|");
+                Console.WriteLine(
+                    $"Abonent : {info.Key.Phone.Number.Number}; Was disconect from station. Because of non-payment;");
+                Console.WriteLine("|=====================================================|");
             }
         }
 
         private void PayHandler(object sender, IUser user)
         {
-            if(!_disconectedUserCollection.Contains(user)) return;
+            if (!_disconectedUserCollection.Contains(user)) return;
 
             var sourcePort = _ats.PortsMapping[user.Phone.Number];
 

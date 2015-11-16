@@ -9,11 +9,11 @@ namespace ATS.Station_Model.AbstractClasses
 {
     public abstract class Station : IStation
     {
-        private readonly IDictionary<ITerminal, ITerminal> _activeCallMapping;
-        private readonly ICollection<CallInfo> _callInfoCollection;
+        protected readonly IDictionary<ITerminal, ITerminal> _activeCallMapping;
+        protected readonly ICollection<CallInfo> _callInfoCollection;
         private readonly ICollection<IPort> _portCollection;
-        private readonly ICollection<ITerminal> _terminalCollection;
-        private readonly ICollection<ITerminal> _waitActionTerminals;
+        protected readonly ICollection<ITerminal> _terminalCollection;
+        protected readonly ICollection<ITerminal> _waitActionTerminals;
 
         protected Station(ICollection<IPort> ports, ICollection<ITerminal> terminals)
         {
@@ -51,7 +51,6 @@ namespace ATS.Station_Model.AbstractClasses
             else
             {
                 SetPortsStateTo(callInfo.Source, callInfo.Target, PortState.Call);
-
                 var targetTerminal = _terminalCollection.FirstOrDefault(x => x.Number == callInfo.Target);
 
                 targetTerminal?.GetReqest(callInfo.Source);
@@ -119,7 +118,7 @@ namespace ATS.Station_Model.AbstractClasses
             SetPortsStateTo(info.Source, info.Target, PortState.Free);
         }
 
-        private void SetPortsStateTo(PhoneNumber source, PhoneNumber target, PortState state)
+        protected void SetPortsStateTo(PhoneNumber source, PhoneNumber target, PortState state)
         {
             var targetPort = GetPortByPhoneNumber(target);
             var sourcePort = GetPortByPhoneNumber(source);

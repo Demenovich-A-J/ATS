@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using ATS.Helpers;
 using ATS.Station_Model.AbstractClasses;
 using ATS.Station_Model.Intarfaces;
 using ATS.Station_Model.States;
@@ -12,6 +14,37 @@ namespace ATS.Test
         {
         }
 
+        protected override void InnerConnectionHandler(object sender, CallInfo callInfo)
+        {
+            var targetPort = GetPortByPhoneNumber(callInfo.Target);
+            if (targetPort.State == PortState.Unpluged || targetPort.State == PortState.Call ||
+                callInfo.Source == callInfo.Target)
+            {
+                SetTerminalStateTo(callInfo.Source, TerminalState.Free);
+
+                callInfo.TimeBegin = TimeHelper.Now;
+                callInfo.Duration = TimeSpan.Zero;
+                OnCallInfoPrepared(this, callInfo);
+            }
+            else
+            {
+                SetPortsStateTo(callInfo.Source, callInfo.Target, PortState.Call);
+                SetTerminalStateTo(callInfo.Source, TerminalState.OutGoingCall);
+                SetTerminalStateTo(callInfo.Target, TerminalState.IncomingCall);
+                var targetTerminal = _terminalCollection.FirstOrDefault(x => x.Number == callInfo.Target);
+
+                targetTerminal?.GetReqest(callInfo.Source);
+                _callInfoCollection.Add(callInfo);
+                _waitActionTerminals.Add(targetTerminal);
+            }
+        }
+
+        private void SetTerminalStateTo(PhoneNumber source, TerminalState state)
+        {
+            var sourceTerminal = GetTerminalByPhoneNumber(source) as TestTerminal;
+
+            if (sourceTerminal != null) sourceTerminal.State = state;
+        }
 
         public override void RegisterEventHandlersForTerminal(ITerminal terminal)
         {
@@ -23,6 +56,20 @@ namespace ATS.Test
         {
             port.StateChanged +=
                 (sender, state) => { Console.WriteLine("Station detected the port changed its State to {0}", state); };
+            port.StateChanging += (sender, state) =>
+            {
+                var a = PortsMapping.FirstOrDefault(x => x.Value == sender).Key;
+                var d = GetTerminalByPhoneNumber(a);
+
+                if (_activeCallMapping.ContainsKey(d) || _activeCallMapping.Values.Contains(d))
+                {
+                    d.Drop();
+                }
+                else
+                {
+                    d.Reject();
+                }
+            };
         }
 
         protected override void ResponseConnectionHandler(object sender, Response responce)

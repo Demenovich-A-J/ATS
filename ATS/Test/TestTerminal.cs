@@ -34,12 +34,6 @@ namespace ATS.Test
             base.Drop();
         }
 
-        public override void Call(PhoneNumber target)
-        {
-            base.Call(target);
-            State = TerminalState.OutGoingCall;
-        }
-
         public override void Answer()
         {
             if (State != TerminalState.IncomingCall) return;
@@ -50,12 +44,6 @@ namespace ATS.Test
         {
             if (State != TerminalState.IncomingCall) return;
             base.Reject();
-        }
-
-        protected override void OnIncomingRequest(PhoneNumber source)
-        {
-            base.OnIncomingRequest(source);
-            State = TerminalState.IncomingCall;
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using ATS.BillingSystemModel.Intarfaces;
 using ATS.Helpers;
 using ATS.Station_Model.Intarfaces;
+using ATS.Station_Model.States;
 using ATS.Test;
 using ATS.User_Model;
 
@@ -13,9 +14,8 @@ namespace ATS.BillingSystemModel.AbstractClass
     {
         private readonly IDictionary<ITerminal, IUser> _terminalsUserMapp;
         private readonly IDictionary<IUser, ITariffPlan> _userTariffPlansMapp;
-        private IDictionary<IUser, DateTime> _userPayDateTime;
-        private IDictionary<IUser, DateTime> _userRegistryDateTimeMapp;
         private int _id;
+        private readonly IDictionary<IUser, DateTime> _userRegistryDateTimeMapp;
 
         protected BillingSystem(ICollection<ITariffPlan> tariffPlans)
         {
@@ -24,19 +24,15 @@ namespace ATS.BillingSystemModel.AbstractClass
             UserCallinfoDictionary = new Dictionary<IUser, ICollection<CallInfo>>();
             _userTariffPlansMapp = new Dictionary<IUser, ITariffPlan>();
             _userRegistryDateTimeMapp = new Dictionary<IUser, DateTime>();
-            _userPayDateTime = new Dictionary<IUser, DateTime>();
+            UserPayDateTime = new Dictionary<IUser, DateTime>();
         }
 
         protected IDictionary<IUser, ICollection<CallInfo>> UserCallinfoDictionary { get; }
 
+        public IDictionary<IUser, DateTime> UserPayDateTime { get; set; }
+
 
         public ICollection<ITariffPlan> TariffPlans { get; }
-
-        public IDictionary<IUser, DateTime> UserPayDateTime
-        {
-            get { return _userPayDateTime; }
-            set { _userPayDateTime = value; }
-        }
 
 
         public ITerminal GetContract(IUser user, ITariffPlan tariffPlan)
@@ -49,7 +45,7 @@ namespace ATS.BillingSystemModel.AbstractClass
             _terminalsUserMapp.Add(terminal, user);
             var date = TimeHelper.Now;
             _userRegistryDateTimeMapp.Add(user, date);
-            _userPayDateTime.Add(user, date);
+            UserPayDateTime.Add(user, date);
             OnToSignСontract(terminal);
             return terminal;
         }
@@ -58,7 +54,7 @@ namespace ATS.BillingSystemModel.AbstractClass
         {
             var sourcePair = GetUserTerminalMapPair(callInfo.Source);
             var targetPair = GetUserTerminalMapPair(callInfo.Target);
-            var targetCallInfo = new CallInfo(callInfo.Target, callInfo.Source, CallInfoState.IncomingCall)
+            var targetCallInfo = new CallInfo(callInfo.Target, callInfo.Source, TerminalState.IncomingCall)
             {
                 TimeBegin = callInfo.TimeBegin,
                 Duration = callInfo.Duration,
@@ -71,6 +67,13 @@ namespace ATS.BillingSystemModel.AbstractClass
             UserCallinfoDictionary[targetPair.Value].Add(targetCallInfo);
         }
 
+        public event EventHandler<ITerminal> ToSignСontract;
+        public event EventHandler<IUser> Pay;
+
+        public void PayForPhoneNubmer(PhoneNumber phoneNumber)
+        {
+            OnPay(_terminalsUserMapp.FirstOrDefault(x => x.Key.Number == phoneNumber).Value);
+        }
 
 
         public void SetNewTariffPlan(IUser user, ITariffPlan tariffPlan)
@@ -107,14 +110,6 @@ namespace ATS.BillingSystemModel.AbstractClass
         public void AddNewTariffPlan(ITariffPlan tariffPlan)
         {
             TariffPlans.Add(tariffPlan);
-        }
-
-        public event EventHandler<ITerminal> ToSignСontract; 
-        public event EventHandler<IUser> Pay;
-
-        public void PayForPhoneNubmer(PhoneNumber phoneNumber)
-        {
-            OnPay(_terminalsUserMapp.FirstOrDefault(x => x.Key.Number == phoneNumber).Value);
         }
 
         protected virtual void OnPay(IUser user)
