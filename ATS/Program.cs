@@ -24,8 +24,8 @@ namespace ATS
             var user2 = new User();
 
 
-            user1.Phone = velcome.GetContract(user1, new EasyTalk(25.1, 0));
-            user2.Phone = velcome.GetContract(user2, new EasyTalk(25.1, 0));
+            user1.Phone = velcome.GetContract(user1, new EasyTalk());
+            user2.Phone = velcome.GetContract(user2, new EasyTalk());
 
             user1.Plug();
             user2.Plug();
